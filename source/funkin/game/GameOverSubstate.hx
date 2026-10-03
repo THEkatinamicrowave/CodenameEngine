@@ -1,5 +1,6 @@
 package funkin.game;
 
+import flixel.FlxState;
 import flixel.sound.FlxSound;
 import flixel.util.FlxColor;
 import flixel.util.FlxTimer;
@@ -141,7 +142,7 @@ class GameOverSubstate extends MusicBeatSubstate
 		
 		isEnding = true;
 
-		var event:GameOverEndEvent = EventManager.get(GameOverEndEvent).recycle();
+		var event = EventManager.get(GameOverEndEvent).recycle(null, 0.7, null, 0.5, FlxColor.BLACK, () -> {}, () -> {}, true, null);
 		gameoverScript.call("onEnd", [event]);
 
 		if (event.cancelled) return;
@@ -159,28 +160,31 @@ class GameOverSubstate extends MusicBeatSubstate
 
     	var delay:Float = event.delayTime;
     	var fade:Float = (event.fadeTime ?? (sndLength - delay));
+		var toState:FlxState = (event.state == null) ? new PlayState() : event.state;
 
     	if (fade < event.timeCap) {
         	fade = sndLength;
         	delay = 0;
     	}
 
-    	new FlxTimer(delay, function(timer:FlxTimer):Void {
+    	new FlxTimer().start(delay, (timer:FlxTimer) -> {
         	if (event.onTimerEnd != null) {
             	event.onTimerEnd();
             	return;
         	}
 
-        	FlxG.camera.fade(event.fadeColor, fade, false, function():Void {
+        	FlxG.camera.fade(event.fadeColor, fade, false, () -> {
             	if (event.onFadeEnd != null) {
                 	event.onFadeEnd();
                 	return;
             	}
 				
 				MusicBeatState.skipTransIn = event.skipTrans;
-				FlxG.switchState(event.state);
+				FlxG.switchState(toState);
 			});
 		});
+
+		gameoverScript.call("onPostEnd", [event]);
 	}
 
 	function exit()

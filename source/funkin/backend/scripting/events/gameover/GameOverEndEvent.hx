@@ -54,7 +54,8 @@ class GameOverEndEvent extends CancellableEvent {
   public var skipTrans:Bool = true;
 
   /**
-    * The redirect state after the camera fade is complete
+    * The redirect state after the camera fade is complete.
+	* (`new PlayState()` if null.)
     */
-  public var state:FlxState = new PlayState();
+  public var state:Null<FlxState>;
 }
